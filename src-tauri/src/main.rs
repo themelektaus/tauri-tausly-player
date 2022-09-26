@@ -3,6 +3,13 @@
     windows_subsystem = "windows"
 )]
 
+static VERSION: &str = "0.1.1";
+
+// Change the version in following files:
+//  - /package.json
+//  - /src-tauri/Cargo.toml
+//  - /src-tauri/tauri.conf.json
+
 extern crate winreg;
 
 use std::env;
@@ -19,6 +26,8 @@ use winreg::enums::*;
 use winreg::RegKey;
 
 fn main() {
+    println!("{}", VERSION);
+    
     tauri::Builder::default()
         .setup(|app| {
             

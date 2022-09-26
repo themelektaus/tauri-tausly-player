@@ -5,6 +5,7 @@ use std::io::Cursor;
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
 
 async fn fetch_url(url: String, file_name: String) -> Result<()> {
+    println!("{}", url);
     let response = reqwest::get(url).await?;
     let mut file = std::fs::File::create(file_name)?;
     let mut content =  Cursor::new(response.bytes().await?);
