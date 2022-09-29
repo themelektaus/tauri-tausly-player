@@ -28,3 +28,29 @@ canvas {
 .hidden {
     display: none !important;
 }
+
+#output {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 5px;
+    display: flex;
+    flex-direction: column-reverse;
+    justify-content: end;
+    align-items: center;
+    gap: 5px;
+}
+
+#output > div {
+    background: #111119CC;
+    color: white;
+    padding: 5px;
+    max-width: 100%;
+    width: 400px;
+    opacity: 0;
+}
+
+#output > div.visible {
+    opacity: 1;
+}

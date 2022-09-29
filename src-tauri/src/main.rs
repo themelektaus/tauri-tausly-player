@@ -3,7 +3,7 @@
     windows_subsystem = "windows"
 )]
 
-static VERSION: &str = "0.1.2";
+static VERSION: &str = "0.1.3";
 
 // Change the version in following files:
 //  - /package.json
@@ -19,11 +19,12 @@ use std::path::Path;
 
 use tauri::Manager;
 
-//use tauri::LogicalSize;
-use tauri::api::dialog;
-
 use winreg::enums::*;
 use winreg::RegKey;
+
+fn sleep(ms: u64) {
+    std::thread::sleep(std::time::Duration::from_millis(ms));
+}
 
 fn main() {
     println!("{}", VERSION);
@@ -45,7 +46,9 @@ fn main() {
                 splash.close().unwrap();
                 
                 tauri::async_runtime::spawn(async move {
+                    sleep(700);
                     let contents = fs::read_to_string(&args[1]).expect("OK");
+                    main.set_title("Tausly Player").unwrap();
                     main.emit("onLoadTauslyCodeFile", contents).unwrap();
                 });
                 
@@ -57,7 +60,8 @@ fn main() {
                 main.close().unwrap();
                 
                 tauri::async_runtime::spawn(async move {
-                    std::thread::sleep(std::time::Duration::from_secs(5));
+                    #[cfg(not(debug_assertions))]
+                    sleep(5000);
                     splash.close().unwrap();
                 });
                 
@@ -66,33 +70,10 @@ fn main() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
-            open_file_dialog,
             resize_window
         ])
-        //.on_window_event(|event| match event.event() {
-        //    tauri::WindowEvent::Resized(size) => {
-        //        let window = event.window();
-        //        let s = window.scale_factor().unwrap();
-        //        let l_size: LogicalSize<u32> = size.to_logical(s);
-        //        window.emit("onWindowResize", l_size).unwrap();
-        //    }
-        //    _ => { }
-        //})
         .run(tauri::generate_context!())
         .expect("ERROR");
-}
-
-#[tauri::command]
-fn open_file_dialog(window: tauri::Window) {
-    dialog::FileDialogBuilder::default()
-        .add_filter("Tausly Code File", &["tausly"])
-        .pick_file(move |path_buf| match path_buf {
-            Some(path) => {
-                let contents = fs::read_to_string(path).expect("OK");
-                window.emit("onLoadTauslyCodeFile", contents).unwrap();
-            }
-            _ => { }
-        });
 }
 
 #[tauri::command]

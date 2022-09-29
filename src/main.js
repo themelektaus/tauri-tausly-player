@@ -2,36 +2,29 @@ const { invoke } = window.__TAURI__.tauri;
 const { listen } = window.__TAURI__.event;
 
 const app = {
-    menu: document.querySelector("#menu"),
-    loadButton: document.querySelector("#load"),
     wrapper: document.querySelector("#wrapper"),
     canvasWrapper: document.querySelector("#canvas"),
     canvas: document.querySelector("#canvas canvas"),
-    //aspectRatio: 1.0,
+    output: document.querySelector("#output"),
     tausly: undefined
 }
 
 listen("onLoadTauslyCodeFile", async e =>
 {
-    app.menu.classList.add("hidden")
     app.canvasWrapper.classList.remove("hidden")
     
     if (!app.tausly)
     {
         app.tausly = new Tausly
+        app.tausly.onEcho = onEcho
         app.tausly.onResize = async (width, height) =>
         {
-            //app.aspectRatio = width / height;
             await invoke("resize_window", { width: width, height: height })
         }
     }
     
     app.tausly.setSize(640, 480)
-    app.tausly.run(e.payload).then(() =>
-    {
-        //app.menu.classList.remove("hidden")
-        app.canvasWrapper.classList.add("hidden")
-    })
+    app.tausly.run(e.payload)
 })
 
 window.onresize = e =>
@@ -55,19 +48,29 @@ window.onresize = e =>
     app.canvasWrapper.style.transform = `scale(${(Math.floor(s * 1000) / 1000).toFixed(3)})`
 }
 
-//listen("onWindowResize", async e =>
-//{
-//    const size = e.payload
-//    if (size.width / size.height != app.aspectRatio)
-//    {
-//        await invoke("resize_window", {
-//            width: size.width,
-//            height: size.width / app.aspectRatio
-//        })
-//    }
-//})
-
-app.loadButton.addEventListener("click", async () =>
+async function onEcho(output)
 {
-    await invoke("open_file_dialog")
-})
+    const fadeSpeed = 300
+    const displayDuration = 3000
+    
+    const div = document.createElement("div")
+    div.style.transition = `opacity ${fadeSpeed}ms`
+    div.innerHTML = output
+    
+    app.output.appendChild(div)
+    await delay()
+    
+    div.classList.add("visible")
+    await delay(fadeSpeed)
+    await delay(displayDuration)
+    
+    div.classList.remove("visible")
+    await delay(fadeSpeed)
+    
+    app.output.removeChild(div)
+}
+
+function delay(ms)
+{
+    return new Promise(resolve => setTimeout(resolve, ms))
+}
