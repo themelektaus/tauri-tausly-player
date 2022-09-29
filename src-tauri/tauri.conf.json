@@ -8,7 +8,7 @@
   },
   "package": {
     "productName": "Tausly Player",
-    "version": "0.1.3"
+    "version": "0.1.4"
   },
   "tauri": {
     "allowlist": {
@@ -51,21 +51,20 @@
       {
         "label": "main",
         "url": "main.html",
-        "title": "Loading...",
-        "decorations": true,
-        "width": 240,
+        "title": "Tausly Player",
+        "decorations": false,
+        "width": 0,
         "height": 0,
         "resizable": true,
         "fullscreen": false,
         "visible": false
       },
       {
-        "label": "splash",
-        "url": "splash.html",
-        "title": "Tausly Player",
+        "label": "dummy",
+        "url": "dummy.html",
         "decorations": false,
-        "width": 300,
-        "height": 150,
+        "width": 0,
+        "height": 0,
         "resizable": false,
         "fullscreen": false,
         "visible": false

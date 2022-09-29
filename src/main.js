@@ -2,6 +2,7 @@ const { invoke } = window.__TAURI__.tauri;
 const { listen } = window.__TAURI__.event;
 
 const app = {
+    splash: document.querySelector("#splash"),
     wrapper: document.querySelector("#wrapper"),
     canvasWrapper: document.querySelector("#canvas"),
     canvas: document.querySelector("#canvas canvas"),
@@ -9,8 +10,15 @@ const app = {
     tausly: undefined
 }
 
-listen("onLoadTauslyCodeFile", async e =>
+listen("onLoad", async e =>
 {
+    if (!e.payload)
+    {
+        app.splash.classList.remove("hidden")
+        await invoke("resize_window", { width: 240, height: 90 })
+        return
+    }
+    
     app.canvasWrapper.classList.remove("hidden")
     
     if (!app.tausly)
@@ -22,6 +30,8 @@ listen("onLoadTauslyCodeFile", async e =>
             await invoke("resize_window", { width: width, height: height })
         }
     }
+    
+    await invoke("show_window")
     
     app.tausly.setSize(640, 480)
     app.tausly.run(e.payload)

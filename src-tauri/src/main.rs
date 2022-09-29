@@ -3,7 +3,7 @@
     windows_subsystem = "windows"
 )]
 
-static VERSION: &str = "0.1.3";
+static VERSION: &str = "0.1.4";
 
 // Change the version in following files:
 //  - /package.json
@@ -35,45 +35,39 @@ fn main() {
             let args: Vec<String> = env::args().collect();
             _ = register_as_default_app(&args[0]);
             
+            app.get_window("dummy").unwrap().close().unwrap();
+            
             let main = app.get_window("main").unwrap();
-            let splash = app.get_window("splash").unwrap();
+            main.show().unwrap();
             
             if args.len() >= 2 {
-                
-                main.center().unwrap();
-                main.show().unwrap();
-                
-                splash.close().unwrap();
-                
                 tauri::async_runtime::spawn(async move {
-                    sleep(700);
                     let contents = fs::read_to_string(&args[1]).expect("OK");
-                    main.set_title("Tausly Player").unwrap();
-                    main.emit("onLoadTauslyCodeFile", contents).unwrap();
+                    main.emit("onLoad", contents).unwrap();
                 });
-                
             } else {
-                
-                splash.center().unwrap();
-                splash.show().unwrap();
-                
-                main.close().unwrap();
-                
                 tauri::async_runtime::spawn(async move {
+                    main.emit("onLoad", "").unwrap();
+                    sleep(1000);
                     #[cfg(not(debug_assertions))]
-                    sleep(5000);
-                    splash.close().unwrap();
+                    sleep(4000);
+                    main.close().unwrap();
                 });
-                
             }
             
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            show_window,
             resize_window
         ])
         .run(tauri::generate_context!())
         .expect("ERROR");
+}
+
+#[tauri::command]
+fn show_window(window: tauri::Window) {
+    window.set_decorations(true).unwrap();
 }
 
 #[tauri::command]
