@@ -1,5 +1,0 @@
-ECHO "Test 1"
-SLEEP 500
-ECHO "Test 2"
-SLEEP 500
-ECHO "Test 3"
