@@ -52,9 +52,9 @@ String.prototype.matchKeyword = function(keyword, argumentCount)
     for (let i = 0; i < argumentCount; i++)
     {
         if (i == 0)
-            pattern += "\\s+(.+?)"
+            pattern += "\\s+(.+?)" + Regex.outsideQuotes
         else
-            pattern += "\\s*\\,\\s*(.+?)"
+            pattern += "\\s*\\,\\s*(.+?)" + Regex.outsideQuotes
     }
     pattern += "$"
     
@@ -81,6 +81,9 @@ CanvasRenderingContext2D.prototype.refresh = function()
 
 CanvasRenderingContext2D.prototype.fillTextWrapped = function(text, x, y, maxWidth, fullText)
 {
+    if (!String.isString(text))
+        text = "" + text
+    
     let lines = this.getTextLines(text.split("\n"), maxWidth)
     
     if (fullText !== undefined)
@@ -220,6 +223,14 @@ class ImageToTausly
             let rgba = Array.from(data.slice(i, i + 4))
             
             let index = Math.max(0, Math.ceil(rgba.getLuminance() * colorChars.length) - 1)
+            
+            if (rgba[3] == 0)
+            {
+                index = Math.floor(i / 4 / img.width)
+                pixelMap[index] += " "
+                continue
+            }
+            
             let colorChar = colorChars[index]
             if (colorChar.index >= colorChar.chars.length)
             {
@@ -286,7 +297,7 @@ class Functions
             "this.root.lastDeltaTime"
         ],
         [
-            /\bTIME\b/gi,
+            /\bTIME\b/g,
             "this.root.lastTime"
         ],
         [
@@ -392,6 +403,10 @@ class Functions
         [
             /\bREAD\b\s*\((.*?)\)/gi,
             "Functions._READ_.call(this, $1)"
+        ],
+        [
+            /\bLERP\b\s*\(\s*(.+?)\s*\,\s*(.+?)\s*\,\s*(.+?)\s*\)/gi,
+            "Functions._LERP_($1, $2, $3)"
         ]
     ]
     
@@ -542,6 +557,11 @@ class Functions
     static _READ_(key, defaultValue)
     {
         return this.root.getData(key, defaultValue)
+    }
+    
+    static _LERP_(a, b, t)
+    {
+        return (1 - t) * a + t * b
     }
 }
 
@@ -2652,9 +2672,9 @@ class SmoothDampLine extends Line
         }
         
         const line = new SmoothDampLine(options)
-        line.getCurrent = matches[1]
-        line.getTarget = matches[2]
-        line.getCurrentVelocity = matches[3]
+        line.current = matches[1]
+        line.target = matches[2]
+        line.currentVelocity = matches[3]
         line.getSmoothTime = matches[4]
         line.getDeltaTime = matches[5]
         line.getMaxSpeed = matches[6]
@@ -2663,9 +2683,9 @@ class SmoothDampLine extends Line
     
     compile()
     {
-        this.getCurrent = this.createFunction(this.getCurrent)
-        this.getTarget = this.createFunction(this.getTarget)
-        this.getCurrentVelocity = this.createFunction(this.getCurrentVelocity)
+        this.getCurrent = this.createFunction(this.current)
+        this.getTarget = this.createFunction(this.target)
+        this.getCurrentVelocity = this.createFunction(this.currentVelocity)
         this.getSmoothTime = this.createFunction(this.getSmoothTime)
         this.getDeltaTime = this.createFunction(this.getDeltaTime)
         this.getMaxSpeed = this.createFunction(this.getMaxSpeed)
