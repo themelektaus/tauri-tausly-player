@@ -3,7 +3,7 @@
     windows_subsystem = "windows"
 )]
 
-static VERSION: &str = "0.1.5";
+static VERSION: &str = "0.1.6";
 
 // Change the version in following files:
 //  - /package.json
